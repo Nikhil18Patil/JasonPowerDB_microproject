@@ -60,13 +60,13 @@ placeholder="Enter Class" name="class">
       </div>    
 
 <input type="button" class="btn btn-primary" id="empSave" value="Save"
-onclick="saveEmployee();">
+onclick="save();">
 
-<input type="button" class="btn btn-primary" id="chaneg" value="Change"
-onclick="saveEmployee();">
+<input type="button" class="btn btn-primary" id="change" value="Change"
+onclick="changeEmployee();">
 
 <input type="button" class="btn btn-primary" id="reset" value="Reset"
-onclick="saveEmployee();">
+onclick="resetForm();">
 
 </form>
 </div>
@@ -153,18 +153,9 @@ jsonObj = JSON.parse(dataJsonObj);
 return jsonObj;
 }
 
-function resetForm() {
-$("#rollno").val("");
-$("#name").val("");
-$("#calss").val("");
-$("#birthdate").val("");
-$("#address").val("");
-$("#enrolldate").val("");
-$("#Roll_no").focus();
-}
 
 
-function saveEmployee() {
+function save() {
 var jsonStr = validateAndGetFormData();
 if (jsonStr === "") {
 return;
@@ -182,6 +173,57 @@ resetForm();
 }
 
 
+//this section is for chnage button it will retrieve data and update   that data
+function changeEmployee() {
+  var s_roll = $("#rollno").val();
+  if (s_roll === "") {
+    alert("Student Roll number Required");
+    $("#rollno").focus();
+    return;
+  }
+
+  var getRequest = createGETRequest("90933053|-31949323875391997|90951494", s_roll, "School_db", "Student_Rel");
+  jQuery.ajaxSetup({ async: false });
+  var resultObj = executeCommand(getRequest, "http://api.login2explore.com:5577", "/api/irl");
+  jQuery.ajaxSetup({ async: true });
+
+  if (resultObj.result === "true" && resultObj.data.length > 0) {
+    // Data found, populate the form fields with the retrieved data
+    $("#name").val(resultObj.data[0].name);
+    $("#class").val(resultObj.data[0].class);
+    $("#birthdate").val(resultObj.data[0].birthdate);
+    $("#address").val(resultObj.data[0].address);
+    $("#enrolldate").val(resultObj.data[0].enrolldate);
+  } else {
+    alert("Data not found for Roll Number: " + s_roll);
+  }
+}
+
+
+function createGETRequest(connToken, rollno, dbName, relName) {
+  var getRequest = "{\n"
+    + "\"token\": \"" + connToken + "\","
+    + "\"cmd\": \"GET\",\n"
+    + "\"dbName\": \"" + dbName + "\",\n"
+    + "\"rel\": \"" + relName + "\",\n"
+    + "\"jsonStr\": \"{ \\\"ROLLNO\\\": \\\"" + rollno + "\\\" }\"\n"
+    + "}";
+  return getRequest;
+}
+
+
+// this will reset the form 
+function resetForm() {
+  $("#rollno").val("");
+  $("#name").val("");
+  $("#class").val("");
+  $("#birthdate").val("");
+  $("#address").val("");
+  $("#enrolldate").val("");
+  $("#rollno").focus();
+}
+
 </script>
 </body>
 </html>
+
